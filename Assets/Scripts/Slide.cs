@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using DG.Tweening;
+using DG.Tweening.Core;
+using DG.Tweening.Plugins.Options;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,6 +18,8 @@ namespace AnthelmeXGobelins
         private TextMeshProUGUI[] _textsUGUI;
         private TextMeshPro[] _texts;
         private MeshRenderer[] _meshRenderers;
+
+        private List<TweenerCore<Color, Color, ColorOptions>> _tweenerCores = new List<TweenerCore<Color, Color, ColorOptions>>();
 
         private void Awake()
         {
@@ -63,42 +68,70 @@ namespace AnthelmeXGobelins
 
         private void Fade(float targetAlpha, float duration)
         {
+            KillPreviousTweens();
+            
             var delay = Slider.FadeDelay * targetAlpha;
-        
-            foreach (var image in _images)
+
+            for (var i = 0; i < _images.Length; i++)
             {
-                image.DOFade(targetAlpha, duration)
+                var image = _images[i];
+                var tweenerCore = image.DOFade(targetAlpha, duration)
                     .SetDelay(delay)
                     .SetEase(Ease.InOutQuad);
-            }
-            
-            foreach (var image in _rawImages)
-            {
-                image.DOFade(targetAlpha, duration)
-                    .SetDelay(delay)
-                    .SetEase(Ease.InOutQuad);
-            }
-        
-            foreach (var text in _textsUGUI)
-            {
-                text.DOFade(targetAlpha, duration)
-                    .SetDelay(delay)
-                    .SetEase(Ease.InOutQuad);
-            }
-            
-            foreach (var text in _texts)
-            {
-                text.DOFade(targetAlpha, duration)
-                    .SetDelay(delay)
-                    .SetEase(Ease.InOutQuad);
+
+                _tweenerCores.Add(tweenerCore);
             }
 
-            foreach (var meshRenderer in _meshRenderers)
+            for (var i = 0; i < _rawImages.Length; i++)
             {
-                meshRenderer.material.DOFade(targetAlpha, duration)
-                                    .SetDelay(delay)
-                                    .SetEase(Ease.InOutQuad);
+                var image = _rawImages[i];
+                var tweenerCore = image.DOFade(targetAlpha, duration)
+                    .SetDelay(delay)
+                    .SetEase(Ease.InOutQuad);
+
+                _tweenerCores.Add(tweenerCore);
             }
+
+            for (var i = 0; i < _textsUGUI.Length; i++)
+            {
+                var text = _textsUGUI[i];
+                var tweenerCore = text.DOFade(targetAlpha, duration)
+                    .SetDelay(delay)
+                    .SetEase(Ease.InOutQuad);
+
+                _tweenerCores.Add(tweenerCore);
+            }
+
+            for (var i = 0; i < _texts.Length; i++)
+            {
+                var text = _texts[i];
+                var tweenerCore = text.DOFade(targetAlpha, duration)
+                    .SetDelay(delay)
+                    .SetEase(Ease.InOutQuad);
+
+                _tweenerCores.Add(tweenerCore);
+            }
+
+            for (var i = 0; i < _meshRenderers.Length; i++)
+            {
+                var meshRenderer = _meshRenderers[i];
+                var tweenerCore = meshRenderer.material.DOFade(targetAlpha, duration)
+                    .SetDelay(delay)
+                    .SetEase(Ease.InOutQuad);
+
+                _tweenerCores.Add(tweenerCore);
+            }
+        }
+
+        private void KillPreviousTweens()
+        {
+            for (var i = 0; i < _tweenerCores.Count; i++)
+            {
+                var tweenerCore = _tweenerCores[i];
+                tweenerCore.Kill();
+            }
+
+            _tweenerCores.Clear();
         }
         
 #if UNITY_EDITOR
